@@ -1,0 +1,24 @@
+{
+  "name": "nodeget-bootstrap",
+  "version": "1.0.0",
+  "description": "The bootstrap for the NodeGet project, including installation scripts, a collection of essential JS workers, shell script snippets, and more.",
+  "main": "index.js",
+  "type": "module",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "worker:build": "node build.mjs",
+    "worker:watch": "node build.mjs --watch",
+    "all:build": "node build.mjs && cp -rf shell dist"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "AGPL",
+  "devDependencies": {
+    "chokidar": "^5.0.0",
+    "esbuild": "^0.28.0",
+    "fast-glob": "^3.3.3",
+    "fs-extra": "^11.3.4"
+  }
+}
