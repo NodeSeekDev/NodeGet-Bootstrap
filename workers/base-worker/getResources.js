@@ -1,9 +1,9 @@
 const defaultResourceUrl = 'https://bootstrap.nodeget.com/workers'
 
-export async function getResources(resourceUrl = defaultResourceUrl, workerName) {
+export async function getResources(resource_url = defaultResourceUrl, workerName) {
     const resources = await Promise.all(
         ['index.js', 'manifest.json', 'readme.md']
-            .map(f => fetch(`${resourceUrl}/${workerName}/${f}`).then(r => r.text()))
+            .map(f => fetch(`${resource_url}/${workerName}/${f}`).then(r => r.text()))
     )
     return {
         code: resources[0],

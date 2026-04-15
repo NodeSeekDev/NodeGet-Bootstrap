@@ -53,12 +53,12 @@ export default {
 
     // self update
     async update(params, env, ctx) {
-        const disableSelfUpdate = env.disableSelfUpdate === "true"
+        const disableSelfUpdate = env["disable_self_update"] === "true"
         if (disableSelfUpdate) {
             return // disabled
         }
 
-        return upsertWorker(env.token, ctx.workerName, env.resourceUrl)
+        return upsertWorker(env.token, ctx.workerName, env.resource_url)
     }
 }
 

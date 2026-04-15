@@ -2,9 +2,9 @@ import { unicodeToBase64 } from '../../lib/base64'
 import { upsertWorkerCron } from './upsertWorkerCron'
 import { getResources } from './getResources'
 
-export async function upsertWorker(token, workerName, resourceUrl) {
+export async function upsertWorker(token, workerName, resource_url) {
     const resources = await getResources(
-        resourceUrl,
+        resource_url,
         workerName
     )
 
