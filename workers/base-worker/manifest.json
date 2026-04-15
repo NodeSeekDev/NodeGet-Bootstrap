@@ -2,9 +2,8 @@
     "name":"base-worker",
     "cron":"0 0 * * * *",
     "env":{
-        "resourceUrl":"",
-        "disable-self-update":"false",
-        "disable-module-update":"false"
+        "resource_url":"",
+        "disable_auto_update":"false"
     },
     "route_name":"$random"
 }

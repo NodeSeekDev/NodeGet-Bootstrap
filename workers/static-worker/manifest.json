@@ -1,0 +1,7 @@
+{
+    "name":"static-worker",
+    "env":{
+        "disable_auto_update":"false"
+    },
+    "route_name":"static-worker-route"
+}

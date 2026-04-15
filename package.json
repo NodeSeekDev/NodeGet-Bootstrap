@@ -10,7 +10,7 @@
   "scripts": {
     "worker:build": "node build.mjs",
     "worker:watch": "node build.mjs --watch",
-    "all:build": "node build.mjs && cp -rf shell dist"
+    "all:build": "node build.mjs && cp -rf shell dist && cp snippets.json dist"
   },
   "keywords": [],
   "author": "",

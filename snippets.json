@@ -1,6 +1,26 @@
 [
     {
-        "name":"hello world",
-        "content":"echo 'hello world'"
+        "name":"NodeQuality",
+        "content":"bash <(curl -sL https://run.NodeQuality.com)"
+    },
+    {
+        "name":"IP质量",
+        "content":"bash <(curl -sL IP.Check.Place)"
+    },
+    {
+        "name":"yabs",
+        "content":"curl -sL yabs.sh | bash -s --5"
+    },
+    {
+        "name":"科技lion综合脚本",
+        "content":"bash <(curl -sL kejilion.sh)"
+    },
+    {
+        "name":"融合怪脚本",
+        "content":"bash <(wget -qO- --no-check-certificate https://gitlab.com/spiritysdx/za/-/raw/main/ecs.sh)"
+    },
+    {
+        "name":"安装warp",
+        "content":"wget -N https://gitlab.com/fscarmen/warp/-/raw/main/menu.sh && bash menu.sh"
     }
 ]

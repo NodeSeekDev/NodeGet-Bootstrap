@@ -1,19 +1,24 @@
 import { unicodeToBase64 } from '../../lib/base64'
 import { upsertWorkerCron } from './upsertWorkerCron'
-import { getResources } from './getResources'
+import { getWorkerResources } from './getResources'
 
-export async function upsertWorker(token, workerName, resourceUrl) {
-    const resources = await getResources(
-        resourceUrl,
-        workerName
-    )
-
-    const manifest = resources.manifest
-
+export async function upsertWorker(token, workerName, resource_url) {
     const oldWorker = await nodeget('js-worker_read', {
         token,
         name: workerName
     }).then(r => r.result)
+
+    if(oldWorker && oldWorker.env?.disable_auto_update === "true"){
+        return
+    }
+
+    const resources = await getWorkerResources(
+        workerName,
+        resource_url
+    )
+
+    const manifest = resources.manifest
+
 
     if(oldWorker && 
         oldWorker.env.version_hash && 
@@ -32,7 +37,8 @@ export async function upsertWorker(token, workerName, resourceUrl) {
         env: {
             ...manifest?.env,
             ...oldWorker?.env,
-            version_hash: manifest.version_hash
+            version_hash: manifest.version_hash,
+            token
         },
         route_name: routeName
     }
