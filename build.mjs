@@ -125,7 +125,7 @@ async function copyAssets(worker) {
 
   await Promise.all(
     files
-      .filter(f => f !== 'index.js')
+      .filter(f => !f.endsWith('.js'))
       .map(file =>
         fs.copy(
           path.join(worker.srcDir, file),
