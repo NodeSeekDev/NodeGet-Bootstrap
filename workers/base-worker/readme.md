@@ -1,6 +1,7 @@
 # nodeget base worker
 
 此worker在nodeget-server被安装时辅助安装，用于提高用户体验
+
 注意：不要删除或者修改此worker的代码，否则可能会引发错误
 
 ## 环境变量

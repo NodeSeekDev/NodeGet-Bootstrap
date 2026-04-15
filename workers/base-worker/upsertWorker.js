@@ -1,6 +1,6 @@
 import { unicodeToBase64 } from '../../lib/base64'
 import { upsertWorkerCron } from './upsertWorkerCron'
-import { getResources } from './getResources'
+import { getWorkerResources } from './getResources'
 
 export async function upsertWorker(token, workerName, resource_url) {
     const oldWorker = await nodeget('js-worker_read', {
@@ -12,9 +12,9 @@ export async function upsertWorker(token, workerName, resource_url) {
         return
     }
 
-    const resources = await getResources(
-        resource_url,
-        workerName
+    const resources = await getWorkerResources(
+        workerName,
+        resource_url
     )
 
     const manifest = resources.manifest
