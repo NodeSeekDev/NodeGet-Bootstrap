@@ -3,8 +3,7 @@
     "cron":"0 0 * * * *",
     "env":{
         "resource_url":"",
-        "disable_self_update":"false",
-        "disable_module_update":"false"
+        "disable_auto_update":"false"
     },
     "route_name":"$random"
 }

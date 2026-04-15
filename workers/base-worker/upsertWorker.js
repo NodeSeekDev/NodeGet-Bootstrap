@@ -3,6 +3,15 @@ import { upsertWorkerCron } from './upsertWorkerCron'
 import { getResources } from './getResources'
 
 export async function upsertWorker(token, workerName, resource_url) {
+    const oldWorker = await nodeget('js-worker_read', {
+        token,
+        name: workerName
+    }).then(r => r.result)
+
+    if(oldWorker && oldWorker.env?.disable_auto_update === "true"){
+        return
+    }
+
     const resources = await getResources(
         resource_url,
         workerName
@@ -10,10 +19,6 @@ export async function upsertWorker(token, workerName, resource_url) {
 
     const manifest = resources.manifest
 
-    const oldWorker = await nodeget('js-worker_read', {
-        token,
-        name: workerName
-    }).then(r => r.result)
 
     if(oldWorker && 
         oldWorker.env.version_hash && 
@@ -32,7 +37,8 @@ export async function upsertWorker(token, workerName, resource_url) {
         env: {
             ...manifest?.env,
             ...oldWorker?.env,
-            version_hash: manifest.version_hash
+            version_hash: manifest.version_hash,
+            token
         },
         route_name: routeName
     }

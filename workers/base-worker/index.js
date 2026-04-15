@@ -51,14 +51,26 @@ export default {
         }
     },
 
-    // self update
     async update(params, env, ctx) {
-        const disableSelfUpdate = env["disable_self_update"] === "true"
-        if (disableSelfUpdate) {
-            return // disabled
+        const essentialModules = [
+            'static-worker2'
+        ]
+        const errors = []
+        for(let i = 0, len = essentialModules.length; i < len; i++){
+            const worker = essentialModules[i]
+            try {
+                await upsertWorker(env.token, worker, env.resource_url)
+            } catch (error) {
+                errors.push({
+                    worker,
+                    updateError: error.toString() + '\n' + error.stack
+                })
+            }
         }
-
-        return upsertWorker(env.token, ctx.workerName, env.resource_url)
+        return {
+            base:await upsertWorker(env.token, ctx.workerName, env.resource_url),
+            essentialModules:errors.length === 0 ? undefined : errors
+        }
     }
 }
 
