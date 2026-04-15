@@ -1,48 +1,65 @@
+import { upsertWorker } from './upsertWorker'
+
 export default {
     async onCall(params, env, ctx) {
+        if (params.lifecycle) {
+            await this.lifecycle(params, env, ctx)
+        }
+
+        return { ok: true, from: "onCall", params }
     },
     async onCron(params, env, ctx) {
-        // self-update
-        // todo: version control.
-        const defaultResourceUrl = 'https://bootstrap.nodeget.com/workers/base-worker/index.js'
-        const resourceUrl = env.resourceUrl || defaultResourceUrl
-        const baseWorkerContent = await fetch(`${resourceUrl}/base-worker.js`).then(r => r.text())
-        await this.updateWorker({
-            name:ctx.workerName || 'nodeget-base-worker.js',
-            content:baseWorkerContent
-        })
-    },
-    async updateWorker(worker = {}) {
-        const workerName = worker.name
-        const content = worker.content
-
-        if(!workerName){
-            throw 'worker name not found'
-        }
-        if(!content){
-            throw 'content not found'
-        }
-
         try {
-            const oldWorker = await nodeget('js-worker_read', {
-                token:env.token,
-                name:workerName
-            }).then(r => r.result)
-
-            if(!oldWorker){
-                throw 'worker not found'
+            // self-update
+            if(params.task === 'update'){
+                return {
+                    task: await this.update(params, env, ctx)
+                }
             }
-          
-            const update = await nodeget('js-worker_update', {
-                ...oldWorker,
-                token:env.token,
-                "js_script_base64": btoa(content),
-                "create_at": undefined,
-                "update_at": undefined,
-            })
-            return update
+            return {
+                ok: true
+            }
         } catch (error) {
-            return {error: error.toString() + '\n' + error.stack}
+            return { error: error.toString() + '\n' + error.stack }
         }
     },
+    async lifecycle(params, env, ctx) {
+        const hook = params.lifecycle
+        switch (hook) {
+            case 'server-create':
+                await this.update(params, env, ctx)
+                break;
+
+            case 'server-update':
+                await this.update(params, env, ctx)
+                break;
+
+            case 'server-destroy':
+                break;
+
+            case 'agent-create':
+                break;
+
+            case 'agent-update':
+                break;
+
+            case 'agent-destroy':
+                break;
+
+            default:
+                break;
+        }
+    },
+
+    // self update
+    async update(params, env, ctx) {
+        const disableSelfUpdate = env.disableSelfUpdate === "true"
+        if (disableSelfUpdate) {
+            return // disabled
+        }
+
+        return upsertWorker(env.token, ctx.workerName, env.resourceUrl)
+    }
 }
+
+
