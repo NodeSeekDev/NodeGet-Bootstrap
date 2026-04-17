@@ -5,7 +5,10 @@ export default {
     async onCall(params, env, ctx) {
         try {
             if (params.lifecycle) {
-                await this.lifecycle(params, env, ctx)
+                return {
+                    lifecycle: params.lifecycle,
+                    result: await this.lifecycle(params, env, ctx)
+                }
             }
         } catch (error) {
             return { error: error.toString() + '\n' + error.stack }
@@ -32,11 +35,14 @@ export default {
         const hook = params.lifecycle
         switch (hook) {
             case 'server-create':
-                await this.update(params, env, ctx)
+                return await Promise.all([
+                    this.update(params, env, ctx),
+                    this.addSnippets(params, env, ctx),
+                ])
                 break;
 
             case 'server-update':
-                await this.update(params, env, ctx)
+                return await this.update(params, env, ctx)
                 break;
 
             case 'server-destroy':
