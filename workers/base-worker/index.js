@@ -38,6 +38,7 @@ export default {
                 return await Promise.all([
                     this.update(params, env, ctx),
                     this.addSnippets(params, env, ctx),
+                    this.addCron(params, env, ctx),
                 ])
                 break;
 
@@ -130,6 +131,35 @@ export default {
                 })
             })
         )
+    },
+    async addCron(params, env, ctx) {
+        const cronList = await getResources(
+            ['/cron.json'], env.resource_url
+        ).then(r => JSON.parse(r[0]))
+
+        // 是否存在kv
+        const crontabs = await nodeget('crontab_get', {
+            token: env.token
+        })
+            .then(r => (r.result || []).map(v => v.name))
+            .then(r => new Set(r))
+        
+        const data = cronList.map(cron => {
+            const method = crontabs.has(cron.name) ? 'crontab_edit' : 'crontab_create'
+            return {
+                "jsonrpc": "2.0",
+                "method": method,
+                "params": {
+                    ...cron,
+                    token:env.token,
+                },
+                "id": randomUUID()
+            }
+        })
+        const cronResult = await nodeget(data)
+            .then(r => r.result)
+
+        return cronResult
     }
 }
 
