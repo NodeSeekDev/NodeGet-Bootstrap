@@ -1,0 +1,93 @@
+[
+    {
+        "name":"periodic-cleanup",
+        "cron_expression":"0 0 * * * *",
+        "cron_type": {
+            "server":"clean_up_database"
+        }
+    },
+    {
+        "name":"tcping-上海电信",
+        "cron_expression":"0/20 * * * * *",
+        "cron_type": {
+            "agent": [
+                [ ],
+                {
+                    "task": {
+                        "tcp_ping": "sh-ct-v4.ip.zstaticcdn.com:80" 
+                    }
+                }
+            ]
+        }
+    },
+    {
+        "name":"tcping-上海联通",
+        "cron_expression":"0/20 * * * * *",
+        "cron_type": {
+            "agent": [
+                [ ],
+                {
+                    "task": {
+                        "tcp_ping": "sh-cu-v4.ip.zstaticcdn.com:80" 
+                    }
+                }
+            ]
+        }
+    },
+    {
+        "name":"tcping-上海移动",
+        "cron_expression":"0/20 * * * * *",
+        "cron_type": {
+            "agent": [
+                [ ],
+                {
+                    "task": {
+                        "tcp_ping": "sh-cm-v4.ip.zstaticcdn.com:80" 
+                    }
+                }
+            ]
+        }
+    },
+    {
+        "name":"ping-上海电信",
+        "cron_expression":"0/20 * * * * *",
+        "cron_type": {
+            "agent": [
+                [ ],
+                {
+                    "task": {
+                        "ping": "sh-ct-v4.ip.zstaticcdn.com" 
+                    }
+                }
+            ]
+        }
+    },
+    {
+        "name":"ping-上海联通",
+        "cron_expression":"0/20 * * * * *",
+        "cron_type": {
+            "agent": [
+                [ ],
+                {
+                    "task": {
+                        "ping": "sh-cu-v4.ip.zstaticcdn.com" 
+                    }
+                }
+            ]
+        }
+    },
+    {
+        "name":"ping-上海移动",
+        "cron_expression":"0/20 * * * * *",
+        "cron_type": {
+            "agent": [
+                [ ],
+                {
+                    "task": {
+                        "ping": "sh-cm-v4.ip.zstaticcdn.com" 
+                    }
+                }
+            ]
+        }
+    }
+]
