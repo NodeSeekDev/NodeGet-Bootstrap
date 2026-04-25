@@ -1,3 +1,6 @@
+import {handleRequest} from './handleRequest'
+import {handleCleanUpDatabase} from './handleCleanUpDatabase'
+
 export default {
   async onCall(params, env, ctx) {
     const task = params.task || {}
@@ -5,10 +8,20 @@ export default {
     const token = task.token // must be superToken
 
     switch (taskName) {
-        case "fetch":
+        case "http_request":
             // like agent http_request
-            const http_request = task.params
-            break;
+            const httpRequest = task.data
+            return handleRequest(httpRequest)
+
+        case "ip":
+            // like agent http_request
+            return fetch("https://ip.nodeget.com/json")
+              .then(r => r.json())
+              .then(r => r.ip)
+
+        case "clean_up_database":
+            // like agent http_request
+            return handleCleanUpDatabase(env.token)
     
         default:
             return {
