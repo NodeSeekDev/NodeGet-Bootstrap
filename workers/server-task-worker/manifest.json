@@ -1,15 +1,15 @@
 {
-    "name":"base-worker",
+    "name":"server-task-worker",
     "crons":[
         {
-            "name":"base-worker-update",
+            "name":"periodic-cleanup",
             "cron_expression":"0 0 * * * *",
             "cron_type": {
                 "server":{
                     "js_worker":[
-                        "base-worker",
+                        "server-task-worker",
                         {
-                            "task": "update"
+                            "task": "clean_up_database"
                         }
                     ]
                 }
@@ -17,7 +17,6 @@
         }
     ],
     "env":{
-        "resource_url":"",
         "disable_auto_update":"false"
     },
     "route_name":"$random"

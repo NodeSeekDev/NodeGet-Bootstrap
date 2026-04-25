@@ -1,12 +1,5 @@
 [
     {
-        "name":"periodic-cleanup",
-        "cron_expression":"0 0 * * * *",
-        "cron_type": {
-            "server":"clean_up_database"
-        }
-    },
-    {
         "name":"tcping-上海电信",
         "cron_expression":"0/20 * * * * *",
         "cron_type": {

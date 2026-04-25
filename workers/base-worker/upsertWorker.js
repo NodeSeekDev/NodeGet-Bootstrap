@@ -1,6 +1,6 @@
 import { unicodeToBase64 } from '../../lib/base64'
-import { upsertWorkerCron } from './upsertWorkerCron'
 import { getWorkerResources } from './getResources'
+import { upsertCrons } from '../../lib/crons'
 
 export async function upsertWorker(token, workerName, resource_url) {
     const oldWorker = await nodeget('js-worker_read', {
@@ -62,8 +62,8 @@ export async function upsertWorker(token, workerName, resource_url) {
 
     // crontab
     let cron
-    if (manifest.cron) {
-        cron = await upsertWorkerCron(token, workerName, manifest.cron)
+    if (Array.isArray(manifest.crons) && manifest.crons.length > 0) {
+        cron = await upsertCrons(manifest.crons, token)
     }
 
     return {
