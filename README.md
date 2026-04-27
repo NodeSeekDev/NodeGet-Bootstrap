@@ -11,5 +11,5 @@ npm run install && npm run all:build
 ## dev
 
 ```
-npm run install && npm run all:build
+npm run all:watch
 ```

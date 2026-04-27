@@ -13,4 +13,12 @@
 无
 
 ## rpc call接口
-无
+
+触发生命周期处理逻辑
+
+输入params
+```json
+{
+    "lifecycle":"server-create" // or 'server-update'
+}
+```
