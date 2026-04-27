@@ -71,7 +71,8 @@ export default {
     async update(params, env, ctx) {
         const essentialModules = [
             'static-worker',
-            'server-task-worker'
+            'server-task-worker',
+            'ip-location-update',
         ]
         const errors = []
         for (let i = 0, len = essentialModules.length; i < len; i++) {
@@ -108,7 +109,7 @@ export default {
             })
         }
         const scriptNames = await nodeget('kv_get_all_keys', {
-            token: env.toString,
+            token: env.token,
             namespace
         }).then(r => new Set(r.result))
 

@@ -1,9 +1,11 @@
-# nodeget worker
+# nodeget server task worker
 
 本worker用于处理一些基础的server任务，包括
 - http请求
 - 获取ip
 - 清理过期的数据
+
+注意：不要删除或者修改此worker的代码，否则可能会引发错误
 
 ## 环境变量
 - token: 默认为：superToken

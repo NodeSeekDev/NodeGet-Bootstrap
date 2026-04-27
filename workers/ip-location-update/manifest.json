@@ -1,0 +1,21 @@
+{
+    "name":"ip-location-update",
+    "crons":[
+        {
+            "name":"ip-location-update",
+            "cron_expression":"0 20 * * * *",
+            "cron_type": {
+                "server":{
+                    "js_worker":[
+                        "ip-location-update",
+                        { }
+                    ]
+                }
+            }
+        }
+    ],
+    "env":{
+        "disable_auto_update":"false"
+    },
+    "route_name":"$random"
+}
