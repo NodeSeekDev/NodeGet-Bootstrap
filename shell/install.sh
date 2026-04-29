@@ -11,7 +11,11 @@ binary_file=""
 dashboard_url="${dashboard_url:-https://dash.nodeget.com}"
 install_script_url="${install_script_url:-https://install.nodeget.com}"
 releases_url="${releases_url:-https://install.nodeget.com}"
-releases_tag="${releases_tag:-v0.0.2}"
+
+if [ -z "$create_quick_tunnel" ]; then
+    releases_tag="$( curl -sI https://github.com/NodeSeekDev/NodeGet/releases/latest \
+        | sed -n 's#.*tag/\(.*\)\r#\1#p')"
+fi
 
 function _red() {
     echo -e "\033[0;31m$1\033[0m"
