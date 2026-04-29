@@ -1,0 +1,23 @@
+{
+    "name":"tg-bot-worker",
+    "crons":[
+        {
+            "name":"check-online-status",
+            "cron_expression":"*/10 * * * * *",
+            "cron_type": {
+                "server":{
+                    "js_worker":[
+                        "tg-bot-worker",
+                        {
+                            "task": "check-online"
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "env":{
+        "disable_auto_update":"false"
+    },
+    "route_name":"$random"
+}
