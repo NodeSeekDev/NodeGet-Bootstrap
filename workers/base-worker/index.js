@@ -1,6 +1,7 @@
 import { upsertWorker } from './upsertWorker'
 import { getResources } from './getResources'
 import { upsertCrons } from '../../lib/crons'
+import { db_limit_config } from './config'
 
 export default {
     async onCall(params, env, ctx) {
@@ -38,6 +39,7 @@ export default {
             case 'server-create':
                 return await Promise.all([
                     this.update(params, env, ctx),
+                    this.initGlobal(params, env, ctx),
                     this.addSnippets(params, env, ctx),
                     getResources(
                         ['/cron.json'], env.resource_url
@@ -90,6 +92,45 @@ export default {
             base: await upsertWorker(env.token, ctx.workerName, env.resource_url),
             essentialModules: errors.length === 0 ? undefined : errors
         }
+    },
+
+    async initGlobal(params, env, ctx) {
+        // 是否存在kv
+        const namespaces = await nodeget('kv_list_all_namespace', {
+            token: env.token
+        }).then(r => r.result)
+
+        const namespace = 'global'
+        if (namespaces.indexOf(namespace) === -1) {
+            await nodeget('kv_create', {
+                token: env.token,
+                namespace
+            })
+        }
+
+        const allLimits = Array.from(Object.keys(db_limit_config))
+
+        const limitsExisted = await nodeget('kv_get_all_keys', {
+            token: env.token,
+            namespace
+        }).then(r => new Set(r.result))
+        const notExisted = allLimits.filter(limit => !limitsExisted.has(limit))
+
+        return Promise.all(
+            notExisted.map(limit => {
+                return nodeget({
+                    "jsonrpc": "2.0",
+                    "method": "kv_set_value",
+                    "params": {
+                        "token": env.token,
+                        "namespace": namespace,
+                        "key": limit,
+                        "value": db_limit_config[limit]
+                    },
+                    "id": randomUUID()
+                })
+            })
+        )
     },
 
     async addSnippets(params, env, ctx) {
