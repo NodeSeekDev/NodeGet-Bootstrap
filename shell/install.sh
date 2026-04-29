@@ -11,7 +11,7 @@ binary_file=""
 dashboard_url="${dashboard_url:-https://dash.nodeget.com}"
 install_script_url="${install_script_url:-https://install.nodeget.com}"
 releases_url="${releases_url:-https://install.nodeget.com}"
-releases_tag="${releases_tag:-0.0.2}"
+releases_tag="${releases_tag:-v0.0.2}"
 
 function _red() {
     echo -e "\033[0;31m$1\033[0m"
