@@ -11,7 +11,7 @@ jsonrpc_max_connections = 200
 # JSON-RPC 单次请求耗时日志级别（call / batch / notification）
 # 可选 trace / debug / info / warn / error，默认 trace
 # 该项独立于 log_level，仅控制 RPC 耗时日志
-jsonrpc_timing_log_level = "trace"
+jsonrpc_timing_log_level = "warn"
 
 # 是否启用 Unix Socket（仅非 Windows 平台）
 # 启用后会额外监听 unix_socket_path 对应的 Axum 主路由
