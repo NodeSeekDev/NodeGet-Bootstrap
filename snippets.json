@@ -9,7 +9,7 @@
     },
     {
         "name":"yabs",
-        "content":"curl -sL yabs.sh | bash -s --5"
+        "content":"curl -sL yabs.sh | bash -s -- -5"
     },
     {
         "name":"科技lion综合脚本",
