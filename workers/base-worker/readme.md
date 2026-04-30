@@ -2,6 +2,8 @@
 
 此worker在nodeget-server被安装时辅助安装，用于提高用户体验
 
+如果需要关闭此worker的自我升级，可以到定时任务里面关闭名为base-worker-update的定时任务
+
 注意：不要删除或者修改此worker的代码，否则可能会引发错误
 
 ## 环境变量

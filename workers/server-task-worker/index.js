@@ -36,6 +36,9 @@ export default {
   },
 
   async onCron(params, env, ctx) {
+    if(params.task){
+      return this.onCall(params, env, ctx)
+    }
     return { ok: true, from: "onCron", params, env };
   },
 
