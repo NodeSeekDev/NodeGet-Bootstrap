@@ -37,7 +37,7 @@ database_url = "sqlite:///var/lib/nodeget-server/nodeget-server.db?mode=rwc"
 # SQLx 日志级别
 # 可选 trace / debug / info / warn / error，默认 info
 # 若此项低于 log_level，则不会打印 SQL 执行日志
-sqlx_log_level = "info"
+sqlx_log_level = "warn"
 
 # 连接超时，单位毫秒，默认 3000
 connect_timeout_ms = 3000

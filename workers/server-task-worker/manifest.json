@@ -9,7 +9,9 @@
                     "js_worker":[
                         "server-task-worker",
                         {
-                            "task": "clean_up_database"
+                            "task": {
+                                "name": "clean_up_database"
+                            }
                         }
                     ]
                 }
