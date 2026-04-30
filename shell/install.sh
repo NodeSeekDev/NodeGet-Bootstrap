@@ -12,7 +12,7 @@ dashboard_url="${dashboard_url:-https://dash.nodeget.com}"
 install_script_url="${install_script_url:-https://install.nodeget.com}"
 releases_url="${releases_url:-https://install.nodeget.com}"
 
-if [ -z "$create_quick_tunnel" ]; then
+if [ -z "$releases_tag" ]; then
     releases_tag="$( curl -sI https://github.com/NodeSeekDev/NodeGet/releases/latest \
         | sed -n 's#.*tag/\(.*\)\r#\1#p')"
 fi
