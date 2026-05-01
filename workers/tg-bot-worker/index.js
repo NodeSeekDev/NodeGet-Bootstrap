@@ -6,7 +6,7 @@ import { Telegram } from '../../lib/telegram'
 import { formatBytes, formatUptime, escapeHTML } from '../../lib/format'
 import { onUpdate } from './tg/onUpdate'
 import { offlineTimeout, commands } from './config'
-import { checkOnline } from './checkOnline'
+import { checkStatusChange } from './operate'
 
 function makeBot(env, ctx){
     const token = env.token
@@ -14,6 +14,9 @@ function makeBot(env, ctx){
     const botSecret = env.botSecret
     const adminUid = env.adminUid
     const bot = new Telegram(botToken, botSecret, { adminUid, token, ctx})
+    if(botToken === 'Get From @BotFather'){
+        throw "bot token not specified"
+    }
 
     return bot
 }
@@ -28,6 +31,7 @@ export default {
                         const msg = task.message || {}
                         const bot = makeBot(env, ctx)
                         await bot.sendMessage(msg)
+                        return {ok:true, task}
                         break;
                     }
                 default:
@@ -43,10 +47,12 @@ export default {
         try {
             const task = params.task || {}
             switch (task.name) {
-                case 'check-online':
+                case 'check-status-change':
                     {
                         const bot = makeBot(env, ctx)
-                        await checkOnline(bot, token)
+                        const msg = await checkStatusChange(env.token)
+                        bot.sendMessage(msg)
+                        return {ok:true, task}
                         break;
                     }
             
@@ -66,7 +72,7 @@ export default {
                 error: 'not allowed caller'
             }
         }
-        return { ok: true, from: "onInlineCall", params, env, ctx };
+        return this.onCall(params, env, ctx)
     },
     async onRoute(request, env, ctx) {
         const botSecret = env.botSecret

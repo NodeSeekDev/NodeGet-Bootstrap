@@ -75,6 +75,7 @@ export default {
             'static-worker',
             'server-task-worker',
             'ip-location-update',
+            'tg-bot-worker',
         ]
         const errors = []
         for (let i = 0, len = essentialModules.length; i < len; i++) {

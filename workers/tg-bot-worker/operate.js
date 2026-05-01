@@ -273,3 +273,57 @@ ${onlineText}
 ${offlineText}`
     }
 }
+
+export async function checkStatusChange(token) {
+
+    const namespace = 'global'
+    const key = "last_offline_uuids"
+    const lastOfflineUuids = await nodeget('kv_get_value', {
+        token:token,
+        namespace,
+        key
+    }).then(r => new Set(r.result || []))
+
+    const agentUuids = await getAllAgentUuid(token)
+    const agentNameMap = await getAgentNameMap(token, agentUuids)
+    const dynamicArray = await getDynamicMultiLast(token, agentUuids)
+
+    const onlineUuids = dynamicArray.filter(v => Date.now() - v.timestamp < offlineTimeout).map(v => v.uuid)
+    const offlineUuids = dynamicArray.filter(v => Date.now() - v.timestamp >= offlineTimeout).map(v => v.uuid)
+
+    const recoveredUuids = onlineUuids.filter(v => lastOfflineUuids.has(v))
+    const recentOfflineUuids = offlineUuids.filter(v => !lastOfflineUuids.has(v))
+
+
+    await nodeget("kv_set_value", {
+        token:token,
+        namespace,
+        key,
+        value:offlineUuids
+    })
+
+    const recentOnline = recoveredUuids.map(id => agentNameMap.get(id))
+    const recentOffline = recentOfflineUuids.map(id => agentNameMap.get(id))
+
+
+
+    const onlineText = recentOnline.length
+        ? `<blockquote expandable>${recentOnline.map(v => '- ' + escapeHTML(v)).join("\n")}</blockquote>`
+        : "无"
+
+    const offlineText = recentOffline.length
+        ? `<blockquote expandable>${recentOffline.map(v => '- ' + escapeHTML(v)).join("\n")}</blockquote>`
+        : "无"
+
+    return {
+        parse_mode: "HTML",
+        text:
+            `💡 服务器节点状态变动
+
+🟢 最近恢复节点:
+${onlineText}
+
+🔴 最近离线节点:
+${offlineText}`
+    }
+}

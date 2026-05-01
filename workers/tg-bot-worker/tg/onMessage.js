@@ -2,14 +2,18 @@ import {
     listServers, 
     checkAllServerStatus, 
     checkServerStatus,
-    getServerUUID
+    getServerUUID,
+    checkStatusChange
 } from '../operate'
 
 const helpMessage = `
 /list 显示所有agent节点序号和名称
 /statusAll 显示所有agent节点是否在线
 /status [节点序号/节点名/节点uuid] 显示agent节点的当前详细状态
+/statusChange 显示在线信息有变动的节点
 `.trim()
+
+import { offlineTimeout, commands } from '../config'
 
 /**
  * Handle incoming Message
@@ -50,6 +54,16 @@ export async function onMessage(bot, message) {
                 return bot.sendMessage({
                     chat_id: message.chat.id,
                     ...await checkAllServerStatus(bot.metaInfo.token)
+                })
+            }
+            if (/^\/statusChange/.exec(message.text)) {
+                await bot.sendMessage({
+                    chat_id: message.chat.id,
+                    text: '⏳ 检查服务器状态变动，请稍等...',
+                })
+                return bot.sendMessage({
+                    chat_id: message.chat.id,
+                    ...await checkStatusChange(bot.metaInfo.token)
                 })
             }
             if (/^\/status \S+$/.exec(message.text)) {

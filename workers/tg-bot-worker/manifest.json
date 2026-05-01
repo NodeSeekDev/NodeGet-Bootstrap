@@ -17,7 +17,9 @@
         }
     ],
     "env":{
-        "disable_auto_update":"false"
+        "disable_auto_update":"false",
+        "botSecret":"randomstr",
+        "botToken":"Get From @BotFather"
     },
     "route_name":"$random"
 }
