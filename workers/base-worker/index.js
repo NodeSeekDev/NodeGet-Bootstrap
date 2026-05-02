@@ -20,10 +20,12 @@ export default {
     },
     async onCron(params, env, ctx) {
         try {
-            // self-update
             if (params.task === 'update') {
                 return {
-                    task: await this.update(params, env, ctx)
+                    task: {
+                        ...await this.update(params, env, ctx),
+                        ...await this.updateSelf(params, env, ctx)
+                    }
                 }
             }
             return {
@@ -35,22 +37,36 @@ export default {
     },
     async lifecycle(params, env, ctx) {
         const hook = params.lifecycle
-        switch (hook) {
-            case 'server-create':
-                return await Promise.all([
-                    this.update(params, env, ctx),
-                    this.initGlobal(params, env, ctx),
-                    this.addSnippets(params, env, ctx),
-                    getResources(
+
+        const init = async() => {
+            await Promise.all([
+                this.initGlobal(params, env, ctx),
+                this.update(params, env, ctx),
+                this.addSnippets(params, env, ctx),
+                getResources(
                         ['/cron.json'], env.resource_url
                     )
                         .then(r => JSON.parse(r[0]))
                         .then(crons => upsertCrons(crons, env.token))
-                ])
+            ])
+            await this.setInitedFlag(params, env, ctx)
+            await this.updateSelf(params, env, ctx)
+        }
+
+        switch (hook) {
+            case 'server-create':
+                await init()
                 break;
 
             case 'server-update':
-                return await this.update(params, env, ctx)
+                if(!this.getInitedFlag(params, env, ctx)){
+                    return await init()
+                }
+
+                return {
+                    ...this.update(params, env, ctx),
+                    ...this.updateSelf(params, env, ctx),
+                }
                 break;
 
             case 'server-destroy':
@@ -72,9 +88,9 @@ export default {
 
     async update(params, env, ctx) {
         const essentialModules = [
-            'static-worker',
             'server-task-worker',
             'ip-location-update',
+            'static-worker',
             'tg-bot-worker',
         ]
         const errors = []
@@ -90,10 +106,15 @@ export default {
             }
         }
         return {
-            base: await upsertWorker(env.token, ctx.workerName, env.resource_url),
             essentialModules: errors.length === 0 ? undefined : errors
         }
     },
+    async updateSelf(params, env, ctx) {
+        return {
+            base: await upsertWorker(env.token, ctx.workerName, env.resource_url),
+        }
+    },
+
 
     async initGlobal(params, env, ctx) {
         // 是否存在kv
@@ -132,6 +153,40 @@ export default {
                 })
             })
         )
+    },
+
+    async setInitedFlag(params, env, ctx) {
+        const namespace = 'global'
+
+        return nodeget(
+            "kv_set_value",
+            {
+                "token": env.token,
+                "namespace": namespace,
+                "key": 'inited',
+                "value": true
+            },
+        )
+    },
+    async getInitedFlag(params, env, ctx) {
+        // 是否存在kv
+        const namespaces = await nodeget('kv_get_value', {
+            token: env.token
+        }).then(r => r.result)
+
+        const namespace = 'global'
+        if (namespaces.indexOf(namespace) === -1) {
+            return false
+        }
+
+        return nodeget(
+            "kv_get_value",
+            {
+                "token": env.token,
+                "namespace": namespace,
+                "key": 'inited'
+            },
+        ).then(r => r.result)
     },
 
     async addSnippets(params, env, ctx) {
