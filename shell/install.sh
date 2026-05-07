@@ -315,9 +315,8 @@ upgrade_server() {
 
     select_binary
 
-    service nodeget-server stop
     app_manage server upgrade serve
-    service nodeget-server start
+    service nodeget-server restart
 
 
     _green "✅ Server 升级完成"
@@ -332,9 +331,8 @@ upgrade_agent() {
 
     select_binary
 
-    service nodeget-agent stop
     app_manage agent upgrade
-    service nodeget-agent start
+    service nodeget-agent restart
 
     _green "✅ Agent 升级完成"
 
@@ -460,7 +458,7 @@ parse_args() {
 
             while [[ $# -gt 0 ]]; do
                 case "$1" in
-                    --server-ws)
+                    --server-ws|--server_ws)
                         ws_listener="$2"
                         shift 2
                         ;;
