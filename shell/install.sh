@@ -460,7 +460,7 @@ parse_args() {
 
             while [[ $# -gt 0 ]]; do
                 case "$1" in
-                    --server_ws)
+                    --server-ws)
                         ws_listener="$2"
                         shift 2
                         ;;
