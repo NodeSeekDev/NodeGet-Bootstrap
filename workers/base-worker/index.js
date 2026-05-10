@@ -1,6 +1,6 @@
 import { upsertWorker } from './upsertWorker'
 import { getResources } from './getResources'
-import { upsertCrons } from '../../lib/crons'
+import { addCronsIfNotExist } from '../../lib/crons'
 import { db_limit_config } from './config'
 
 export default {
@@ -47,7 +47,7 @@ export default {
                         ['/cron.json'], env.resource_url
                     )
                         .then(r => JSON.parse(r[0]))
-                        .then(crons => upsertCrons(crons, env.token))
+                        .then(crons => addCronsIfNotExist(crons, env.token))
             ])
             await this.setInitedFlag(params, env, ctx)
             await this.updateSelf(params, env, ctx)
@@ -55,17 +55,23 @@ export default {
 
         switch (hook) {
             case 'server-create':
-                await init()
+                if(!this.getInitedFlag(params, env, ctx)){
+                    return {"msg":"already inited"}
+                }
+                return init()
+
+            case 'server-reset':
+                return init()
                 break;
 
             case 'server-update':
                 if(!this.getInitedFlag(params, env, ctx)){
-                    return await init()
+                    return init()
                 }
 
                 return {
-                    ...this.update(params, env, ctx),
-                    ...this.updateSelf(params, env, ctx),
+                    ...await this.update(params, env, ctx),
+                    ...await this.updateSelf(params, env, ctx),
                 }
                 break;
 
