@@ -3,7 +3,7 @@
 log_level = "info"
 
 # 监控数据上报间隔（毫秒）
-dynamic_summary_report_interval_ms = 5000
+dynamic_summary_report_interval_ms = 1000
 dynamic_report_interval_ms = 1000 # 必须是dynamic_summary_report_interval_ms的整数倍
 static_report_interval_ms = 300000
 
