@@ -55,7 +55,7 @@ export default {
 
         switch (hook) {
             case 'server-create':
-                if(!this.getInitedFlag(params, env, ctx)){
+                if(!await this.getInitedFlag(params, env, ctx)){
                     return init()
                 }
                 return {"msg":"already inited"}
@@ -65,7 +65,7 @@ export default {
                 break;
 
             case 'server-update':
-                if(!this.getInitedFlag(params, env, ctx)){
+                if(!await this.getInitedFlag(params, env, ctx)){
                     return init()
                 }
 
@@ -176,7 +176,7 @@ export default {
     },
     async getInitedFlag(params, env, ctx) {
         // 是否存在kv
-        const namespaces = await nodeget('kv_get_value', {
+        const namespaces = await nodeget('kv_list_all_namespace', {
             token: env.token
         }).then(r => r.result)
 
