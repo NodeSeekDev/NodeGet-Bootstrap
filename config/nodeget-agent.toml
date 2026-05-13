@@ -12,7 +12,7 @@ static_report_interval_ms = 300000
 agent_uuid = "auto_gen"
 
 # 连接超时时间（毫秒），默认 1000
-connect_timeout_ms = 1000
+connect_timeout_ms = 5000
 
 # 终端 Shell，Linux 下默认 Bash，Windows 下默认 CMD
 terminal_shell = "bash"
