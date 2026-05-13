@@ -56,9 +56,9 @@ export default {
         switch (hook) {
             case 'server-create':
                 if(!this.getInitedFlag(params, env, ctx)){
-                    return {"msg":"already inited"}
+                    return init()
                 }
-                return init()
+                return {"msg":"already inited"}
 
             case 'server-reset':
                 return init()
