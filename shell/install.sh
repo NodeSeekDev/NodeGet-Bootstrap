@@ -86,6 +86,26 @@ detect_env() {
         libc="gnu"
     fi
 
+    # glibc 版本检测（仅 gnu 时）
+    if [ "$libc" = "gnu" ]; then
+        glibc_version=$(
+            ldd --version 2>/dev/null \
+            | head -n1 \
+            | grep -oE '[0-9]+\.[0-9]+' \
+            | head -n1
+        )
+
+        required="2.25"
+
+        # sort -V 做语义版本比较
+        lowest=$(printf '%s\n%s\n' "$required" "$glibc_version" | sort -V | head -n1)
+
+        if [ "$lowest" != "$required" ]; then
+            echo "glibc >= $required required, current: $glibc_version, change to musl"
+            libc=musl
+        fi
+    fi
+
     # arm ABI（只在 arm / armv7 下需要）
     abi=""
     if [[ "$arch" == arm* ]]; then
