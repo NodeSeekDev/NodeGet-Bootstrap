@@ -31,6 +31,8 @@ if [ "$(id -u)" != "0" ]; then
     exit 1
 fi
 
+. "https://bootstrap.nodeget.com/shell/_curl.sh"
+
 ########################################
 # detect package manager
 ########################################
@@ -170,7 +172,7 @@ install_binary() {
 
         echo "Downloading $DOWNLOAD_URL"
 
-        curl "-fsL#" "$DOWNLOAD_URL" -o "$TMP/app"
+        _curl "-fsL#" "$DOWNLOAD_URL" -o "$TMP/app"
 
         if unzip -t "$TMP/app" >/dev/null 2>&1; then
             unzip -o "$TMP/app" -d "$TMP"
