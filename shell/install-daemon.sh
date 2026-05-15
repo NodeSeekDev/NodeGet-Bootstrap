@@ -31,7 +31,7 @@ if [ "$(id -u)" != "0" ]; then
     exit 1
 fi
 
-. "https://bootstrap.nodeget.com/shell/_curl.sh"
+. <(curl -s "https://bootstrap.nodeget.com/shell/_curl.sh")
 
 ########################################
 # detect package manager
@@ -322,29 +322,28 @@ echo "Uninstalling $APP_NAME"
 
 detect_init
 
+rm -f "$INSTALL_DIR/$BIN_NAME"
+rm -rf "$CONFIG_DIR"
+rm -rf "$LOG_DIR"
+
 if [ "$INIT" = "systemd" ]; then
 
-    systemctl stop "$SERVICE_NAME" || true
-    systemctl disable "$SERVICE_NAME" || true
     rm -f /etc/systemd/system/$SERVICE_NAME.service
+    systemctl disable --now "$SERVICE_NAME" || true
     systemctl daemon-reload
 
 elif [ "$INIT" = "sysvinit" ]; then
 
-    service "$SERVICE_NAME" stop || true
     rm -f /etc/init.d/$SERVICE_NAME
+    service "$SERVICE_NAME" stop || true
 
 elif [ "$INIT" = "openrc" ]; then
 
-    rc-service "$SERVICE_NAME" stop || true
-    rc-update del "$SERVICE_NAME" || true
     rm -f /etc/init.d/$SERVICE_NAME
-
+    rc-update del "$SERVICE_NAME" || true
+    rc-service "$SERVICE_NAME" stop || true
 fi
 
-rm -f "$INSTALL_DIR/$BIN_NAME"
-rm -rf "$CONFIG_DIR"
-rm -rf "$LOG_DIR"
 
 echo "Uninstalled."
 
