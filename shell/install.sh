@@ -312,8 +312,8 @@ uninstall_server() {
 
     select_binary
 
-    service nodeget-server stop
     app_manage server uninstall
+    service nodeget-server stop
 
 
     _green "✅ Server 卸载完成"
@@ -330,8 +330,8 @@ uninstall_agent() {
 
     select_binary
 
-    service nodeget-agent stop
     app_manage agent uninstall
+    service nodeget-agent stop
 
     _green "✅ Agent 卸载完成"
 
