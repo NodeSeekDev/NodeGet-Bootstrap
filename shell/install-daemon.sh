@@ -327,21 +327,19 @@ rm -rf "$CONFIG_DIR"
 rm -rf "$LOG_DIR"
 
 if [ "$INIT" = "systemd" ]; then
-
-    rm -f /etc/systemd/system/$SERVICE_NAME.service
     systemctl disable --now "$SERVICE_NAME" || true
+    rm -f /etc/systemd/system/$SERVICE_NAME.service
     systemctl daemon-reload
 
 elif [ "$INIT" = "sysvinit" ]; then
-
-    rm -f /etc/init.d/$SERVICE_NAME
     service "$SERVICE_NAME" stop || true
+    rm -f /etc/init.d/$SERVICE_NAME
 
 elif [ "$INIT" = "openrc" ]; then
-
-    rm -f /etc/init.d/$SERVICE_NAME
     rc-update del "$SERVICE_NAME" || true
     rc-service "$SERVICE_NAME" stop || true
+    rm -f /etc/init.d/$SERVICE_NAME
+
 fi
 
 
