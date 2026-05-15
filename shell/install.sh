@@ -435,7 +435,7 @@ app_manage(){
     BIN_NAME="nodeget-${target}" \
     DOWNLOAD_URL="${releases_url}/releases/${binary_file}?tag=${releases_tag}" \
     START_AFTER_INSTALL=false \
-    SERVICE_ARGS="${args} -c /etc/nodeget-${target}.conf" \
+    SERVICE_ARGS="${args} -c /etc/nodeget-${target}.toml" \
     bash <(curl -s "${install_script_url}/install-daemon.sh") "$task"
 }
 
