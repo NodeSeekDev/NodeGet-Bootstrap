@@ -17,6 +17,16 @@ if [ -z "$releases_tag" ]; then
         | sed -n 's#.*tag/\(.*\)\r#\1#p')"
 fi
 
+# Migrate old configuration to new one.
+if [ ! -f "/etc/nodeget-agent.toml" ] && [ -f /etc/nodeget-agent.conf ] ; then
+    mv /etc/nodeget-agent.conf /etc/nodeget-agent.toml
+    ln -s /etc/nodeget-agent.toml /etc/nodeget-agent.conf
+fi
+if [ ! -f "/etc/nodeget-server.toml" ] && [ -f /etc/nodeget-server.conf ] ; then
+    mv /etc/nodeget-server.conf /etc/nodeget-server.toml
+    ln -s /etc/nodeget-server.toml /etc/nodeget-server.conf
+fi
+
 function _red() {
     echo -e "\033[0;31m$1\033[0m"
 }
@@ -185,22 +195,22 @@ install_server() {
     echo
     echo "正在下载配置文件..."
 
-    curl -s -o /etc/nodeget-server.conf "${install_script_url}/config/nodeget-server.toml"
+    curl -s -o /etc/nodeget-server.toml "${install_script_url}/config/nodeget-server.toml"
 
     echo "正在修改配置..."
 
-    sed -i 's/\r//g' /etc/nodeget-server.conf
-    sed -i "s|ws_listener =.*|ws_listener = \"$ws_listener\"|" /etc/nodeget-server.conf
-    sed -i "s|server_uuid =.*|server_uuid = \"$server_uuid\"|" /etc/nodeget-server.conf
+    sed -i 's/\r//g' /etc/nodeget-server.toml
+    sed -i "s|ws_listener =.*|ws_listener = \"$ws_listener\"|" /etc/nodeget-server.toml
+    sed -i "s|server_uuid =.*|server_uuid = \"$server_uuid\"|" /etc/nodeget-server.toml
 
     if [ -n "$db_url" ]; then
-        sed -i "s|database_url =.*|database_url = \"$db_url\"|" /etc/nodeget-server.conf
+        sed -i "s|database_url =.*|database_url = \"$db_url\"|" /etc/nodeget-server.toml
     fi
 
 
     echo "正在启动服务..."
 
-    nodeget-server init -c /etc/nodeget-server.conf &> tmp-nodeget-server.log
+    nodeget-server init -c /etc/nodeget-server.toml &> tmp-nodeget-server.log
     while read -r line; do
         case "$line" in
             *"Super Token:"*) token=${line##*Super Token: } ;;
@@ -208,7 +218,7 @@ install_server() {
         esac
     done < tmp-nodeget-server.log
     rm tmp-nodeget-server.log
-    final_server_uuid=$(nodeget-server get-uuid -c /etc/nodeget-server.conf | tail -n 1)
+    final_server_uuid=$(nodeget-server get-uuid -c /etc/nodeget-server.toml | tail -n 1)
     my_ip=$(curl -4fsS https://ip.nodeget.com/ip || curl -6fsS https://ip.nodeget.com/ip)
 
     service nodeget-server restart || true #to-do 其他init系统
@@ -276,16 +286,16 @@ install_agent() {
 
     echo "正在下载配置文件..."
 
-    curl -s -o /etc/nodeget-agent.conf "${install_script_url}/config/nodeget-agent.toml"
+    curl -s -o /etc/nodeget-agent.toml "${install_script_url}/config/nodeget-agent.toml"
 
     echo "正在修改配置..."
 
-    sed -i 's/\r//g' /etc/nodeget-agent.conf
-    sed -i "s|ws_url =.*|ws_url = \"$server_ws\"|" /etc/nodeget-agent.conf
-    sed -i "s|^server_uuid =.*|server_uuid = \"$server_uuid\"|" /etc/nodeget-agent.conf
-    sed -i "s|token =.*|token = \"$token\"|" /etc/nodeget-agent.conf
-    sed -i "s|agent_uuid =.*|agent_uuid = \"$agent_uuid\"|" /etc/nodeget-agent.conf
-    sed -i "s|name = .*|name = \"$server_name\"|" /etc/nodeget-agent.conf
+    sed -i 's/\r//g' /etc/nodeget-agent.toml
+    sed -i "s|ws_url =.*|ws_url = \"$server_ws\"|" /etc/nodeget-agent.toml
+    sed -i "s|^server_uuid =.*|server_uuid = \"$server_uuid\"|" /etc/nodeget-agent.toml
+    sed -i "s|token =.*|token = \"$token\"|" /etc/nodeget-agent.toml
+    sed -i "s|agent_uuid =.*|agent_uuid = \"$agent_uuid\"|" /etc/nodeget-agent.toml
+    sed -i "s|name = .*|name = \"$server_name\"|" /etc/nodeget-agent.toml
 
     service nodeget-agent restart || true #to-do 其他init系统
     _yellow "✅ Agent 安装完成"
@@ -608,7 +618,7 @@ while true; do
         uninstall-agent) uninstall_agent ;;
         update-server) upgrade_server ;;
         update-agent) upgrade_agent ;;
-        show-server-uuid) nodeget-server get-uuid -c /etc/nodeget-server.conf | tail -n -1;;
+        show-server-uuid) nodeget-server get-uuid -c /etc/nodeget-server.toml | tail -n -1;;
         *) usage ;;
     esac
     menu
