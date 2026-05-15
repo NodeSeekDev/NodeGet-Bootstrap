@@ -547,6 +547,10 @@ Usage:
 Commands:
   install-server         安装服务端
   install-agent          安装客户端
+  update-server          升级服务端
+  update-agent           升级客户端
+  uninstall-server       卸载服务端
+  uninstall-agent        卸载客户端
   help                   显示帮助
 
 ----------------------------------------
