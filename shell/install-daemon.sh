@@ -31,7 +31,7 @@ if [ "$(id -u)" != "0" ]; then
     exit 1
 fi
 
-. "https://bootstrap.nodeget.com/shell/_curl.sh"
+source <(curl -sL "https://bootstrap.nodeget.com/shell/_curl.sh")
 
 ########################################
 # detect package manager
