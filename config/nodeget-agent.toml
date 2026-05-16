@@ -79,7 +79,7 @@ allow_version = true
 # 重启后生效，需谨慎开启
 # 注意：Unix 平台使用 execv 替换当前进程（不创建新进程）
 # 注意：Windows 平台拉起新进程后自身退出
-allow_self_update = false
+allow_self_update = true
 
 # 第二个 Server
 # [[server]]
