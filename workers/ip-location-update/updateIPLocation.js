@@ -3,22 +3,29 @@ export async function updateIPLocation(token, agentUUIDs = []) {
     const results = []
     for (let i = 0, len = agentUUIDs.length; i < len; i++) {
         const uuid = agentUUIDs[i]
-        let ipResult = await nodeget('task_create_task_blocking', {
-            token,
-            target_uuid: uuid,
-            timeout_ms: maxWait,
-            task_type: {
-                "http_request": {
-                    "url": "https://ip.nodeget.com/json?filter=ip",
-                    "method": "GET",
-                    "headers": {
-                        "content-type": "application/json"
-                    },
-                    "body": "",
-                    "ip": "ipv4 auto"
-                }
-            }
-        }).then((r) => r?.result?.task_event_result?.http_request?.body);
+        let ipResultDual = await Promise.all(
+            [4, 6].map(v => {
+                return nodeget('task_create_task_blocking', {
+                    token,
+                    target_uuid: uuid,
+                    timeout_ms: maxWait,
+                    task_type: {
+                        "http_request": {
+                            "url": "https://ip.nodeget.com/json?filter=ip",
+                            "method": "GET",
+                            "headers": {
+                                "content-type": "application/json"
+                            },
+                            "body": "",
+                            "ip": `ipv${v} auto`
+                        }
+                    }
+                }).then((r) => r?.result?.task_event_result?.http_request?.body)
+                  .catch(r => null)
+            })
+        )
+        let ipResult = ipResultDual[0] || ipResultDual[1]
+
         if (ipResult) {
             ipResult = JSON.parse(ipResult)
             results.push(ipResult)
