@@ -1,6 +1,6 @@
 # 日志等级，可选 trace / debug / info / warn / error，默认 info
 # 如果你正在测试或遇到问题，请至少选择 debug
-log_level = "info"
+log_level = "warn"
 
 # WebSocket 监听地址，同时也会监听 Http 服务
 ws_listener = "2211"
