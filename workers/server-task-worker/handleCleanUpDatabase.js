@@ -1,8 +1,16 @@
 export async function handleCleanUpDatabase(token) {
     const logs = [];
 
-    const agentUUIDs = (await nodeget("nodeget-server_list_all_agent_uuid", { token }))
-        .result.uuids;
+    let agentUUIDs, deletedUUIDS = new Set()
+    try {
+        const agentsWithMode = (await nodeget("agent-uuid_list_all_with_agent_mode", { token })).result
+        agentUUIDs = agentsWithMode.map(v => v.uuid)
+        deletedUUIDS = new Set(agentsWithMode.filter(v => v.soft_delete === true).map(v => v.uuid))
+    } catch (error) {
+        agentUUIDs = await nodeget("nodeget-server_list_all_agent_uuid", {
+            token
+        }).then((r) => r.result.uuids);
+    }
 
     // agent 清理任务映射
     const agentTasks = {
@@ -31,15 +39,22 @@ export async function handleCleanUpDatabase(token) {
 
         for (const key in agentTasks) {
             const action = agentTasks[key];
-            const duration = dbLimits
-                .filter(v => v.key === key)
-                .sort((b, a) => a.key.length - b.key.length)[0];
+            const duration = deletedUUIDS.has(agentUUID) ?
+                0 : dbLimits.filter(v => v.key === key)
+                    .sort((b, a) => a.key.length - b.key.length)[0];
 
             if (duration) {
                 const params = { ...paramsBase };
                 params.conditions[1].timestamp_to = Date.now() - duration.value;
-                const result = await nodeget(action, params);
-                logs.push({ [action]: result, agentUUID, params });
+                const cleanIt = async () => {
+                    const result = await nodeget(action, params);
+                    logs.push({ [action]: result, agentUUID, params });
+                }
+                if(deletedUUIDS.has(agentUUID)){
+                    setTimeout(cleanIt, 20 * 1000) // 20秒后清理，避免卡顿
+                }else{
+                    await cleanIt()
+                }
             }
         }
     }
