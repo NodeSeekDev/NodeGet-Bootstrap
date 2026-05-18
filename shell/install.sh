@@ -11,6 +11,7 @@ binary_file=""
 dashboard_url="${dashboard_url:-https://dash.nodeget.com}"
 install_script_url="${install_script_url:-https://install.nodeget.com}"
 releases_url="${releases_url:-https://install.nodeget.com}"
+ws_path="${ws_path:-/nodeget/rpc}"
 
 if [ -z "$releases_tag" ]; then
     releases_tag="$( curl -sI https://github.com/NodeSeekDev/NodeGet/releases/latest \
@@ -231,12 +232,13 @@ install_server() {
     _green "密码: $account_password"
     _green "服务器UUID: $final_server_uuid"
     _green "服务器 IP: $my_ip"
+    _green "服务器路径: $ws_path"
     echo
 
 
     if [ "$create_quick_tunnel" = "true" ]; then
         start_quick_tunnel
-        fast_dashboard_entry='{"name":"'"$(hostname -s)"'", "url":"wss://'"${quick_tunnel_host}"'", "token":"'"${token}"'"}'
+        fast_dashboard_entry='{"name":"'"$(hostname -s)"'", "url":"wss://'"${quick_tunnel_host}${ws_path}"'", "token":"'"${token}"'"}'
         echo "可以通过下面的预览url快速添加服务器到面板"
         _green "$dashboard_url/#/dashboard/node-manage?tab=servers&fill=$(echo $fast_dashboard_entry | base64 -w 0)"
 
