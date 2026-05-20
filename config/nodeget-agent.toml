@@ -43,43 +43,20 @@ ws_url = "ws://127.0.0.1:2211/"
 
 # 是否允许执行任务
 allow_task = true
-
-# 是否允许 ICMP Ping
-allow_icmp_ping = true
-
-# 是否允许 TCP Ping
-allow_tcp_ping = true
-
-# 是否允许 HTTP Ping
-allow_http_ping = true
-
-# 是否允许通用 HTTP 请求
-allow_http_request = true
-
-# 是否允许 Web Shell，谨慎开启
-allow_web_shell = true
-
-# 是否允许执行命令，谨慎开启
-allow_execute = true
-
-# 是否允许读取配置，谨慎开启
-allow_read_config = true
-
-# 是否允许编辑配置，谨慎开启
-allow_edit_config = true
-
-# 是否允许获取 IP 地址
-allow_ip = true
-
-# 是否允许获取版本号
-allow_version = true
-
-# 是否允许自更新，开启后 Server 可通过 SelfUpdate 任务触发 Agent 自动下载并替换二进制
-# 支持升级和降级，版本号仅做格式校验（vX.Y.Z）
-# 重启后生效，需谨慎开启
-# 注意：Unix 平台使用 execv 替换当前进程（不创建新进程）
-# 注意：Windows 平台拉起新进程后自身退出
-allow_self_update = true
+allow_task_type = [ 
+    "http_ping", 
+    "web_shell", 
+    "read_config", 
+    "execute", 
+    "self_update", 
+    "ip", 
+    "version", 
+    "edit_config", 
+    "http_request", 
+    "ping", 
+    "tcp_ping", 
+    "dns",
+]
 
 # 第二个 Server
 # [[server]]
