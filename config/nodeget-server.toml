@@ -24,6 +24,9 @@ unix_socket_path = "/var/lib/nodeget-server/nodeget-server.sock"
 # 如果不是 auto_gen，请自行确保 Uuid 唯一，否则可能导致数据混乱或 UB
 server_uuid = "auto_gen"
 
+tls_cert = "/var/lib/nodeget-server/ssl/nodeget_cert.pem"
+tls_key = "/var/lib/nodeget-server/ssl/nodeget_key.pem"
+
 static_path = "/var/lib/nodeget-server/static/"
 
 # 数据库配置

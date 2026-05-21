@@ -180,12 +180,44 @@ install_server() {
         read -rp "请输入 Postgres 数据库 URL (留空则选择sqlite): " db_url
     fi
 
+    if [ -z "$tls_auto" ]; then
+        read -rp "是否自动生成自签名 TLS 证书 (y/n, 默认n): " tls_auto
+        tls_auto=${tls_auto:-"n"}
+        [ "$tls_auto" = "y" ] && tls_auto="true" || tls_auto="false"
+    fi
     if [ -z "$create_quick_tunnel" ]; then
-        read -rp "是否利用cloudflare tunnel创建快速预览链接 (y/n, 默认y): " create_quick_tunnel
-        create_quick_tunnel=${create_quick_tunnel:-"y"}
+        read -rp "是否利用cloudflare tunnel创建快速预览链接 (y/n, 默认n): " create_quick_tunnel
+        create_quick_tunnel=${create_quick_tunnel:-"n"}
         [ "$create_quick_tunnel" = "y" ] && create_quick_tunnel="true" || create_quick_tunnel="false"
     fi
     echo
+
+
+
+    if [ "$tls_auto" = "true" ]; then
+        tls_cert="${tls_cert:-/var/lib/nodeget-server/ssl/nodeget_cert.pem}" 
+        tls_key="${tls_key:-/var/lib/nodeget-server/ssl/nodeget_key.pem}"
+    fi
+
+    if [ -n "$tls_cert" ] && [ -n "$tls_key" ]; then
+        if [ -f "$tls_cert" ] && [ -f "$tls_key" ]; then
+            _yellow "检测到 TLS 证书和密钥已存在，跳过生成步骤"
+        else
+            _yellow "自动生成 TLS 证书中..."
+            if ! command -v openssl >/dev/null; then
+                echo "Installing openssl..."
+                bash <(curl -s "${install_script_url}/shell/install-daemon.sh") package openssl
+            fi
+            mkdir -p "$(dirname "$tls_cert")"
+            openssl req -x509 -newkey rsa:2048 -nodes \
+                -keyout "$tls_key" \
+                -out "$tls_cert" \
+                -days 3650 -subj "/CN=localhost"
+        fi
+        web_protocol="https"
+    else
+        web_protocol="http"
+    fi
 
     select_binary
 
@@ -203,6 +235,13 @@ install_server() {
     sed -i 's/\r//g' /etc/nodeget-server.toml
     sed -i "s|ws_listener =.*|ws_listener = \"$ws_listener\"|" /etc/nodeget-server.toml
     sed -i "s|server_uuid =.*|server_uuid = \"$server_uuid\"|" /etc/nodeget-server.toml
+    if [ -n "$tls_cert" ] && [ -n "$tls_key" ]; then
+        sed -i "s|tls_cert =.*|tls_cert = \"$tls_cert\"|" /etc/nodeget-server.toml
+        sed -i "s|tls_key =.*|tls_key = \"$tls_key\"|" /etc/nodeget-server.toml
+    else
+        sed -i "/tls_cert/d" /etc/nodeget-server.toml
+        sed -i "/tls_key/d" /etc/nodeget-server.toml 
+    fi
 
     if [ -n "$db_url" ]; then
         sed -i "s|database_url =.*|database_url = \"$db_url\"|" /etc/nodeget-server.toml
@@ -233,6 +272,20 @@ install_server() {
     _green "服务器UUID: $final_server_uuid"
     _green "服务器 IP: $my_ip"
     _green "服务器路径: $ws_path"
+    _green "服务器协议: $web_protocol"
+    echo
+
+    # cloudflare CDN 提醒
+    _yellow "🌐 如果你打算通过Cloudflare直接连接到 NodeGet-Server ，请确保以下设置以保证正常使用："
+    if [ -n "$tls_cert" ] && [ -n "$tls_key" ]; then
+        _green "由于本地程序使用了https，请在cloudflare上将SSL/TLS设置为“完全(FULL)”以确保正常使用"
+    else
+        _green "由于本地程序未使用https，请在cloudflare上将SSL/TLS设置为“灵活(Flexible)”以确保正常使用"
+    fi
+    port_listen="${ws_listener##*:}"
+    if [ "$port_listen" != "443" ]; then
+        _green "由于监听端口不是443，cloudflare需要origin rule，将目标端口设为${port_listen}"
+    fi
     echo
 
 
@@ -277,6 +330,12 @@ install_agent() {
 
     if [ -z "$agent_uuid" ]; then
         read -rp "请输入 Agent UUID: " agent_uuid
+    fi
+
+    if [ -z "$ignore_cert" ]; then
+        read -rp "是否忽略 TLS 证书错误 (y/n, 默认n): " ignore_cert
+        ignore_cert=${ignore_cert:-"n"}
+        [ "$ignore_cert" = "y" ] && ignore_cert="true" || ignore_cert="false"
     fi
     echo
 
@@ -388,7 +447,8 @@ start_quick_tunnel() {
     port_listen="${ws_listener##*:}"
     # 后台运行
     nohup /usr/local/cloudflared tunnel  \
-        --url "http://127.0.0.1:${port_listen}" \
+        --url "${web_protocol}://127.0.0.1:${port_listen}" \
+        --no-tls-verify \
         --protocol http2 >"$LOG_FILE" 2>&1 &
 
     local CF_PID=$!
@@ -438,7 +498,7 @@ app_manage(){
     DOWNLOAD_URL="${releases_url}/releases/${binary_file}?tag=${releases_tag}" \
     START_AFTER_INSTALL=false \
     SERVICE_ARGS="${args} -c /etc/nodeget-${target}.toml" \
-    bash <(curl -s "${install_script_url}/install-daemon.sh") "$task"
+    bash <(curl -s "${install_script_url}/shell/install-daemon.sh") "$task"
 }
 
 ########################################
@@ -506,6 +566,18 @@ parse_args() {
                         create_quick_tunnel="$2"
                         shift 2
                         ;;
+                    --tls_auto)
+                        tls_auto="$2"
+                        shift 2
+                        ;;
+                    --tls_cert)
+                        tls_cert="$2"
+                        shift 2
+                        ;;
+                    --tls_key)
+                        tls_key="$2"
+                        shift 2
+                        ;;
                     *)
                         _red "未知参数: $1"
                         exit 1
@@ -536,6 +608,10 @@ parse_args() {
                         ;;
                     --server-id)
                         server_uuid="$2"
+                        shift 2
+                        ;;
+                    --ignore-cert)
+                        ignore_cert="$2"
                         shift 2
                         ;;
                     *)
@@ -571,7 +647,10 @@ install-server 选项:
   --server-ws <addr>     WebSocket 监听地址 (默认: 0.0.0.0:2211)
   --server-id <uuid>     服务端 ID (可选，默认自动生成)
   --db <url>             postgres/sqlite数据库连接字符串 (默认采用sqlite)
-  --tunnel <true|false>  是否创建 Cloudflare 临时隧道
+  --tunnel <true|false>  是否创建 Cloudflare 临时隧道 (默认: false)
+  --tls_auto             是否自动生成自签名 TLS 证书 (默认: false)
+  --tls_cert <path>      指定TLS 证书路径，若存在对应的文件则不自动生成
+  --tls_key <path>       指定TLS 密钥路径, 若存在对应的文件则不自动生成
 
 ----------------------------------------
 install-agent 选项:
@@ -581,6 +660,7 @@ install-agent 选项:
   --token <token>        认证 Token (必填)
   --agent-id <uuid>      客户端 ID (可选，默认自动生成)
   --server-id <uuid>     绑定的服务端 ID (可选)
+  --ignore-cert <true|false> 是否忽略 TLS 证书错误 (默认: false)
 
 ----------------------------------------
 示例:

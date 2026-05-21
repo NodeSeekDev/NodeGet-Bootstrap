@@ -20,7 +20,7 @@ SERVICE_ARGS="${SERVICE_ARGS:-}"
 DOWNLOAD_URL="${DOWNLOAD_URL:-}"
 
 ACTION="${1:-install}"
-START_AFTER_INSTALL="${1:-true}"
+START_AFTER_INSTALL="${START_AFTER_INSTALL:-true}"
 
 ########################################
 # root check
@@ -445,8 +445,13 @@ uninstall)
     uninstall
     ;;
 
+package)
+    shift
+    install_pkg "$@"
+    ;;
+
 *)
-    echo "Usage: $0 {install|upgrade|uninstall}"
+    echo "Usage: $0 {install|upgrade|uninstall|package}"
     exit 1
     ;;
 

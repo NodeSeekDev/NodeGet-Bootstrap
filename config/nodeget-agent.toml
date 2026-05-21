@@ -58,5 +58,7 @@ allow_task_type = [
     "dns",
 ]
 
+ignore_cert = false
+
 # 第二个 Server
 # [[server]]
