@@ -374,7 +374,7 @@ uninstall_server() {
     select_binary
 
     app_manage server uninstall
-    service nodeget-server stop
+    service nodeget-server stop || true
 
 
     _green "✅ Server 卸载完成"
