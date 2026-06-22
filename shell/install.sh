@@ -494,6 +494,8 @@ enable_logrotate() {
     local dir="/etc/logrotate.d"
     local file="/etc/logrotate.d/nodeget"
 
+    bash <(curl -s "${install_script_url}/shell/install-daemon.sh") package  logrotate || true
+
     # 1. 检查是否支持 logrotate
     if [ ! -d "$dir" ]; then
         echo "[skip] logrotate not supported (/etc/logrotate.d not found)"
