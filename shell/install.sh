@@ -262,6 +262,7 @@ install_server() {
     my_ip=$(curl -4fsS https://ip.nodeget.com/ip || curl -6fsS https://ip.nodeget.com/ip)
 
     service nodeget-server restart || true #to-do 其他init系统
+    enable_logrotate
 
     echo
     _yellow "✅ Server 安装完成"
@@ -359,6 +360,8 @@ install_agent() {
     sed -i "s|name = .*|name = \"$server_name\"|" /etc/nodeget-agent.toml
 
     service nodeget-agent restart || true #to-do 其他init系统
+    enable_logrotate
+
     _yellow "✅ Agent 安装完成"
     _yellow "你可以在下面的链接修改此agent的设置"
     _green  "$dashboard_url/#/dashboard/node/${agent_uuid}/setting"
@@ -482,6 +485,44 @@ start_quick_tunnel() {
     fi
 
     return 1
+}
+
+########################################
+# 日志轮转
+########################################
+enable_logrotate() {
+    local dir="/etc/logrotate.d"
+    local file="/etc/logrotate.d/nodeget"
+
+    # 1. 检查是否支持 logrotate
+    if [ ! -d "$dir" ]; then
+        echo "[skip] logrotate not supported (/etc/logrotate.d not found)"
+        return 1
+    fi
+
+    # 2. 写入配置（存在则覆盖，保证幂等）
+    cat > "$file" <<'EOF'
+/var/log/nodeget-server/app.log
+/var/log/nodeget-server/error.log
+/var/log/nodeget-agent/app.log
+/var/log/nodeget-agent/error.log
+{
+    daily
+    rotate 30
+
+    compress
+
+    missingok
+    notifempty
+
+    copytruncate
+
+    create 0644 root root
+}
+EOF
+
+    _green "[ok] logrotate config created: $file"
+    return 0
 }
 
 ########################################
@@ -639,6 +680,7 @@ Commands:
   update-agent           升级客户端
   uninstall-server       卸载服务端
   uninstall-agent        卸载客户端
+  enable-logrotate       启用日志轮转
   help                   显示帮助
 
 ----------------------------------------
@@ -701,6 +743,7 @@ while true; do
         update-server) upgrade_server ;;
         update-agent) upgrade_agent ;;
         show-server-uuid) nodeget-server get-uuid -c /etc/nodeget-server.toml | tail -n -1;;
+        enable-logrotate) enable_logrotate; exit 0 ;;
         *) usage ;;
     esac
     menu
