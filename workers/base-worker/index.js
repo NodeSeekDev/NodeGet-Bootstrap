@@ -38,10 +38,10 @@ export default {
     async lifecycle(params, env, ctx) {
         const hook = params.lifecycle
 
-        const init = async() => {
+        const init = async(force = false) => {
             await Promise.all([
                 this.initGlobal(params, env, ctx),
-                this.update(params, env, ctx),
+                this.update(params, env, ctx, force),
                 this.addSnippets(params, env, ctx),
                 getResources(
                         ['/cron.json'], env.resource_url
@@ -61,7 +61,7 @@ export default {
                 return {"msg":"already inited"}
 
             case 'server-reset':
-                return init()
+                return init(true)
                 break;
 
             case 'server-update':
@@ -92,7 +92,7 @@ export default {
         }
     },
 
-    async update(params, env, ctx) {
+    async update(params, env, ctx, force = false) {
         const essentialModules = [
             'server-task-worker',
             'ip-location-update',
@@ -103,7 +103,7 @@ export default {
         for (let i = 0, len = essentialModules.length; i < len; i++) {
             const worker = essentialModules[i]
             try {
-                await upsertWorker(env.token, worker, env.resource_url)
+                await upsertWorker(env.token, worker, env.resource_url, force)
             } catch (error) {
                 errors.push({
                     worker,
@@ -117,7 +117,7 @@ export default {
     },
     async updateSelf(params, env, ctx) {
         return {
-            base: await upsertWorker(env.token, ctx.workerName, env.resource_url),
+            base: await upsertWorker(env.token, ctx.workerName, env.resource_url, true),
         }
     },
 
