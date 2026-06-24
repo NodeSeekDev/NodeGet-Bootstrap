@@ -2,7 +2,7 @@ import { unicodeToBase64 } from '../../lib/base64'
 import { getWorkerResources } from './getResources'
 import { upsertCrons } from '../../lib/crons'
 
-export async function upsertWorker(token, workerName, resource_url) {
+export async function upsertWorker(token, workerName, resource_url, force = false) {
     const oldWorker = await nodeget('js-worker_read', {
         token,
         name: workerName
@@ -20,7 +20,7 @@ export async function upsertWorker(token, workerName, resource_url) {
     const manifest = resources.manifest
 
 
-    if(oldWorker && 
+    if(oldWorker && !force &&
         oldWorker.env.version_hash && 
         oldWorker.env.version_hash === manifest.version_hash){
         // same version, no update return
@@ -42,6 +42,8 @@ export async function upsertWorker(token, workerName, resource_url) {
         },
         route_name: routeName
     }
+    manifest?.config?.runtime_clean_time && (newWorker.runtime_clean_time = manifest?.config?.runtime_clean_time)
+    manifest?.config?.max_run_time && (newWorker.max_run_time = manifest?.config?.max_run_time)
 
     let update
     if(oldWorker){

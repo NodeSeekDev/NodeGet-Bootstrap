@@ -20,5 +20,9 @@
         "resource_url":"",
         "disable_auto_update":"false"
     },
+    "config":{
+        "runtime_clean_time":300000,
+        "max_run_time":300000
+    },
     "route_name":"$random"
 }

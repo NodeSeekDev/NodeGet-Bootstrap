@@ -21,5 +21,9 @@
     "env":{
         "disable_auto_update":"false"
     },
+    "config":{
+        "runtime_clean_time":600000,
+        "max_run_time":600000
+    },
     "route_name":"$random"
 }
