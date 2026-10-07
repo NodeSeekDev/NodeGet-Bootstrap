@@ -8,4 +8,5 @@ export const db_limit_config = {
     "database_limit_task": oneDay,
     "database_limit_crontab_result": oneDay,
     "database_limit_js_result": oneDay,
+    "database_limit_traffic_snapshot": 365 * oneDay,
 }

@@ -98,6 +98,7 @@ export default {
             'ip-location-update',
             'static-worker',
             'tg-bot-worker',
+            'traffic-snapshot-worker',
         ]
         const errors = []
         for (let i = 0, len = essentialModules.length; i < len; i++) {
