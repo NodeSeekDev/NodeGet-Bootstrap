@@ -1,0 +1,44 @@
+{
+    "name":"traffic-snapshot-worker",
+    "crons":[
+        {
+            "name":"traffic-snapshot-tick",
+            "cron_expression":"0 * * * * *",
+            "cron_type": {
+                "server":{
+                    "js_worker":[
+                        "traffic-snapshot-worker",
+                        {
+                            "task": {
+                                "name": "snapshot"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "name":"traffic-snapshot-cleanup",
+            "cron_expression":"0 30 * * * *",
+            "cron_type": {
+                "server":{
+                    "js_worker":[
+                        "traffic-snapshot-worker",
+                        {
+                            "task": {
+                                "name": "cleanup"
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "env":{
+        "disable_auto_update":"false"
+    },
+    "config":{
+        "runtime_clean_time":600000,
+        "max_run_time":300000
+    }
+}
