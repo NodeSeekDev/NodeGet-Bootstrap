@@ -1,3 +1,16 @@
+// 保留时长必须是大于 0 的有限数字（毫秒），数字字符串也接受；其余一律视为没设置
+function parseLimit(value) {
+    const n = typeof value === 'string' && value.trim() !== '' ? Number(value) : value;
+    return typeof n === 'number' && Number.isFinite(n) && n > 0 ? n : undefined;
+}
+
+// 节点自己的设置优先，没设置或不合法才用全局值
+function pickLimit(limits, namespace, key) {
+    const own = parseLimit(limits.find(v => v.namespace === namespace && v.key === key)?.value);
+    if (own !== undefined) return own;
+    return parseLimit(limits.find(v => v.namespace === 'global' && v.key === key)?.value);
+}
+
 export async function handleCleanUpDatabase(token) {
     const logs = [];
 
@@ -40,12 +53,11 @@ export async function handleCleanUpDatabase(token) {
         for (const key in agentTasks) {
             const action = agentTasks[key];
             const duration = deletedUUIDS.has(agentUUID) ?
-                0 : dbLimits.filter(v => v.key === key)
-                    .sort((b, a) => a.key.length - b.key.length)[0];
+                0 : pickLimit(dbLimits, agentUUID, key);
 
             if (duration) {
                 const params = { ...paramsBase };
-                params.conditions[1].timestamp_to = Date.now() - duration.value;
+                params.conditions[1].timestamp_to = Date.now() - duration;
                 const cleanIt = async () => {
                     const result = await nodeget(action, params);
                     logs.push({ [action]: result, agentUUID, params });
@@ -72,15 +84,13 @@ export async function handleCleanUpDatabase(token) {
 
     for (const key in globalTasks) {
         const { action, timeKey } = globalTasks[key];
-        const duration = globalDbLimits
-            .filter(v => v.key === key)
-            .sort((b, a) => a.key.length - b.key.length)[0];
+        const duration = parseLimit(globalDbLimits.find(v => v.key === key)?.value);
 
         if (duration) {
             try {
                 const result = await nodeget(action, {
                     token,
-                    query: { condition: [{ [timeKey]: Date.now() - duration.value }] }
+                    query: { condition: [{ [timeKey]: Date.now() - duration }] }
                 });
                 logs.push({ ["delete_" + action]: result });
             } catch (e) { }
